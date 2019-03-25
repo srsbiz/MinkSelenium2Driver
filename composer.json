@@ -18,7 +18,12 @@
             "homepage":  "http://everzet.com"
         }
     ],
-
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/oleg-andreyev/driver-testsuite.git"
+        }
+    ],
     "require": {
         "php":                       ">=5.3.1",
         "behat/mink":                "~1.7@dev",
@@ -26,7 +31,7 @@
     },
 
     "require-dev": {
-        "mink/driver-testsuite": "dev-master"
+        "mink/driver-testsuite": "dev-remove-zend-alloc"
     },
 
     "autoload": {
