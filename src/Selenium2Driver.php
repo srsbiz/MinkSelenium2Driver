@@ -489,6 +489,12 @@ class Selenium2Driver extends CoreDriver
     {
         $element = $this->findElement($xpath);
 
+        if (!\method_exists($element, 'hasAttribute')) {
+            // Newer version of facebook/php-webdriver.
+
+            return $element->getAttribute($name);
+        }
+
         /**
          * If attribute is present but does not have value, it's considered as Boolean Attributes https://html.spec.whatwg.org/#boolean-attributes
          * but here result may be unexpected in case of <element my-attr/>, my-attr should return TRUE, but it will return "empty string"
@@ -513,6 +519,12 @@ class Selenium2Driver extends CoreDriver
      */
     private function hasAttribute(WebDriverElement $element, $name)
     {
+        if (!\method_exists($element, 'hasAttribute')) {
+            // Newer version of facebook/php-webdriver.
+
+            return null !== $element->getAttribute($name);
+        }
+
         return $this->executeJsOnElement($element, "return {{ELEMENT}}.hasAttribute('$name')");
     }
 
