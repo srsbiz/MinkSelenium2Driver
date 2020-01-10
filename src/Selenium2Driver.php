@@ -949,13 +949,17 @@ class Selenium2Driver extends CoreDriver
     }
 
     /**
-     * @param string $xpath
+     * @param string $argument
      *
      * @return RemoteWebElement
      */
-    private function findElement($xpath)
+    protected function findElement($argument)
     {
-        return $this->webDriver->findElement(WebDriverBy::xpath($xpath));
+        if ($argument instanceof RemoteWebElement) {
+            return $argument;
+        }
+
+        return $this->webDriver->findElement(WebDriverBy::xpath($argument));
     }
 
     /**
