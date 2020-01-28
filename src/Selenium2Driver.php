@@ -110,19 +110,37 @@ class Selenium2Driver extends CoreDriver
 
     /**
      * Applies timeouts to the current session
+     * @param bool $curlTimeoutsToo
      */
-    private function applyTimeouts()
+    private function applyTimeouts(bool $curlTimeoutsToo = true)
     {
         // @see https://w3c.github.io/webdriver/#set-timeouts
         $timeouts = $this->webDriver->manage()->timeouts();
+
         if (isset($this->timeouts['implicit'])) {
             $timeouts->implicitlyWait($this->timeouts['implicit']);
-        } else if (isset($this->timeouts['pageLoad'])) {
+        }
+
+        if ($curlTimeoutsToo) {
+            if ($this->isStarted()) {
+                $commandExecutor = $this->webDriver->getCommandExecutor();
+
+                if (isset($this->timeouts['connection'])) {
+                    $commandExecutor->setConnectionTimeout((int)$this->timeouts['connection']);
+                }
+
+                if (isset($this->timeouts['request'])) {
+                    $commandExecutor->setRequestTimeout((int)$this->timeouts['request']);
+                }
+            }
+        }
+
+        if (isset($this->timeouts['pageLoad'])) {
             $timeouts->pageLoadTimeout($this->timeouts['pageLoad']);
-        } else if (isset($this->timeouts['script'])) {
+        }
+
+        if (isset($this->timeouts['script'])) {
             $timeouts->setScriptTimeout($this->timeouts['script']);
-        } else {
-            throw new DriverException('Invalid timeout option');
         }
     }
 
@@ -239,9 +257,15 @@ class Selenium2Driver extends CoreDriver
     public function start()
     {
         try {
-            $this->webDriver = RemoteWebDriver::create($this->wdHost, $this->desiredCapabilities);
-            if (\count($this->timeouts)) {
-                $this->applyTimeouts();
+            $this->webDriver = RemoteWebDriver::create(
+                $this->wdHost,
+                $this->desiredCapabilities,
+                $this->timeouts['connection'] ?? null,
+                $this->timeouts['request'] ?? null
+            );
+
+            if ($this->timeouts) {
+                $this->applyTimeouts(false);
             }
         } catch (\Exception $e) {
             throw new DriverException('Could not open connection: ' . $e->getMessage(), 0, $e);
