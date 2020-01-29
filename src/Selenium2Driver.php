@@ -306,6 +306,10 @@ class Selenium2Driver extends CoreDriver
      */
     public function reset()
     {
+        if (!$this->isStarted()) {
+            return;
+        }
+
         $this->webDriver->manage()->deleteAllCookies();
     }
 
