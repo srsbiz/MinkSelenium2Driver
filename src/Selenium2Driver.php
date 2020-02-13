@@ -37,6 +37,11 @@ use Facebook\WebDriver\WebDriverSelect;
 class Selenium2Driver extends CoreDriver
 {
     /**
+     * @var callable|null
+     */
+    protected $remoteWebDriverFactory;
+
+    /**
      * The WebDriver instance
      *
      * @var RemoteWebDriver
@@ -92,6 +97,16 @@ class Selenium2Driver extends CoreDriver
                 $this->desiredCapabilities->setCapability($key, $val);
             }
         }
+
+        $this->remoteWebDriverFactory = [RemoteWebDriver::class, 'create'];
+    }
+
+    /**
+     * @param callable $remoteWebDriverFactory
+     */
+    public function setRemoteWebDriverFactory($remoteWebDriverFactory): void
+    {
+        $this->remoteWebDriverFactory = $remoteWebDriverFactory;
     }
 
     /**
@@ -257,7 +272,8 @@ class Selenium2Driver extends CoreDriver
     public function start()
     {
         try {
-            $this->webDriver = RemoteWebDriver::create(
+            $this->webDriver = \call_user_func(
+                $this->remoteWebDriverFactory,
                 $this->wdHost,
                 $this->desiredCapabilities,
                 $this->timeouts['connection'] ?? null,
